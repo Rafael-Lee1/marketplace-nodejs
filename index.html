@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Questionários</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #surveyList {
+            margin-top: 20px;
+        }
+
+        .surveyItem {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Plataforma de Questionários</h1>
+        <form id="surveyForm">
+            <label for="title">Título:</label>
+            <input type="text" id="title" name="title">
+            <label for="question1">Pergunta 1:</label>
+            <input type="text" id="question1" name="question1">
+            <label for="options1">Opções:</label>
+            <input type="text" id="options1" name="options1">
+            <button type="submit">Criar Pesquisa</button>
+        </form>
+        <div id="surveyList">
+            <!-- Lista de pesquisas será preenchida dinamicamente com JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Script JavaScript para lidar com a submissão do formulário e fazer requisições AJAX para a API
+
+        // Função para criar uma nova pesquisa
+        function createSurvey(event) {
+            event.preventDefault();
+
+            // Obter os valores do formulário
+            const title = document.getElementById('title').value;
+            const question1 = document.getElementById('question1').value;
+            const options1 = document.getElementById('options1').value.split(',');
+
+            // Enviar requisição POST para a API
+            fetch('/surveys', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    title,
+                    questions: [
+                        { text: question1, options: options1 }
+                    ]
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Pesquisa criada:', data);
+                // Limpar formulário
+                document.getElementById('surveyForm').reset();
+                // Atualizar lista de pesquisas
+                fetchSurveys();
+            })
+            .catch(error => console.error('Erro ao criar pesquisa:', error));
+        }
+
+        // Função para listar todas as pesquisas
+        function fetchSurveys() {
+            fetch('/surveys')
+            .then(response => response.json())
+            .then(surveys => {
+                const surveyList = document.getElementById('surveyList');
+                surveyList.innerHTML = ''; // Limpar lista existente
+                surveys.forEach(survey => {
+                    const surveyItem = document.createElement('div');
+                    surveyItem.classList.add('surveyItem');
+                    surveyItem.textContent = survey.title;
+                    surveyList.appendChild(surveyItem);
+                });
+            })
+            .catch(error => console.error('Erro ao buscar pesquisas:', error));
+        }
+
+        // Adicionar evento de submissão ao formulário
+        document.getElementById('surveyForm').addEventListener('submit', createSurvey);
+
+        // Carregar lista de pesquisas quando a página carregar
+        window.addEventListener('load', fetchSurveys);
+    </script>
+</body>
+</html>

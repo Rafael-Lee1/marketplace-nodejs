@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const path = require('path'); // Importar o módulo 'path' do Node.js
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -33,6 +34,11 @@ app.post('/surveys', async (req, res) => {
 app.get('/surveys', async (req, res) => {
     const surveys = await Survey.find();
     res.json(surveys);
+});
+
+// Definir uma rota para servir o arquivo index.html
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(PORT, () => {
